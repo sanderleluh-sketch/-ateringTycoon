@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://telegram.org"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #fafafa; }
+        .box { border: 2px solid #333; padding: 20px; margin: 10px; border-radius: 10px; }
+        .money { color: green; font-size: 2em; }
+        button { padding: 10px 20px; font-size: 1.2em; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>☕ Моя Кофейня</h1>
+    <div class="box">
+        <p>Касса:</p>
+        <div class="money" id="balance">5000 ₽</div>
+    </div>
+    <div class="box">
+        <p>Сотрудник: <b>Марина (Профи)</b></p>
+        <p id="status">Ждет заказов...</p>
+    </div>
+    <button onclick="order()">Принять заказ (+200 ₽)</button>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        let cash = 5000;
+
+        function order() {
+            cash += 200;
+            document.getElementById('balance').innerText = cash + " ₽";
+            document.getElementById('status').innerText = "Марина варит кофе...";
+            setTimeout(() => { document.getElementById('status').innerText = "Готово! Ждем клиента..."; }, 1000);
+        }
+    </script>
+</body>
+</html>
