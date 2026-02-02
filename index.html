@@ -2,35 +2,66 @@
 <html>
 <head>
     <script src="https://telegram.org"></script>
+    <!-- ... (оставь все стили, что были раньше) ... -->
     <style>
-        body { font-family: sans-serif; text-align: center; background: #fafafa; }
-        .box { border: 2px solid #333; padding: 20px; margin: 10px; border-radius: 10px; }
-        .money { color: green; font-size: 2em; }
-        button { padding: 10px 20px; font-size: 1.2em; cursor: pointer; }
+        body { font-family: sans-serif; background-color: #f0f2f5; text-align: center; padding: 20px; }
+        .stats-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .balance { font-size: 24px; font-weight: bold; color: #2ecc71; }
+        .btn-buy { background: #3498db; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 18px; cursor: pointer; width: 100%; }
+        .btn-buy:active { transform: scale(0.98); }
+        .staff-info { margin-top: 20px; color: #7f8c8d; font-style: italic; }
     </style>
 </head>
 <body>
-    <h1>☕ Моя Кофейня</h1>
-    <div class="box">
-        <p>Касса:</p>
-        <div class="money" id="balance">5000 ₽</div>
+    <div class="stats-card">
+        <div>Баланс Кофейни</div>
+        <div class="balance" id="money_display">0 ₽</div>
     </div>
-    <div class="box">
-        <p>Сотрудник: <b>Марина (Профи)</b></p>
-        <p id="status">Ждет заказов...</p>
+    <div class="stats-card">
+        <div>Склад (Зерно)</div>
+        <div id="stock_display">0%</div>
     </div>
-    <button onclick="order()">Принять заказ (+200 ₽)</button>
+    <button class="btn-buy" onclick="buyStock()">Закупить ингредиенты (-500 ₽)</button>
+    <div class="staff-info" id="status">Бариста Марина ждет заказов...</div>
+    <button class="btn-buy" onclick="saveGame()">Сохранить игру и выйти</button>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand();
-        let cash = 5000;
+        tg.expand(); 
 
-        function order() {
-            cash += 200;
-            document.getElementById('balance').innerText = cash + " ₽";
-            document.getElementById('status').innerText = "Марина варит кофе...";
-            setTimeout(() => { document.getElementById('status').innerText = "Готово! Ждем клиента..."; }, 1000);
+        let playerMoney = 0;
+        let playerStock = 0;
+
+        // Функция запускается при загрузке Mini App
+        window.onload = function() {
+            // Читаем данные из URL, которые прислал Python-бот
+            const urlParams = new URLSearchParams(window.location.search);
+            playerMoney = parseInt(urlParams.get('money')) || 5000;
+            playerStock = parseInt(urlParams.get('stock')) || 100;
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('money_display').innerText = playerMoney + " ₽";
+            document.getElementById('stock_display').innerText = playerStock + "%";
+        }
+
+        function buyStock() {
+            if (playerMoney >= 500) {
+                playerMoney -= 500;
+                playerStock = 100;
+                updateUI();
+                tg.HapticFeedback.impactOccurred('medium');
+            }
+        }
+
+        // Функция отправки данных в Python
+        function saveGame() {
+            // Формируем строку данных: money=123&stock=50
+            let data = `money=${playerMoney}&stock=${playerStock}`;
+            // Отправляем данные Python-боту и закрываем Mini App
+            tg.sendData(data);
+            tg.close();
         }
     </script>
 </body>
